@@ -31,7 +31,7 @@ public class DiawarsClient implements ClientModInitializer {
 		PayloadTypeRegistry.serverboundPlay().register(ClientInfoPayload.TYPE, ClientInfoPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ImagePayload.TYPE, ImagePayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(ImageOpenPayload.TYPE, ImageOpenPayload.CODEC);
-		ClientPlayNetworking.registerReceiver(ImageOpenPayload.TYPE, (payload, context) -> pendingOpenUploadScreen = true);
+		ClientPlayNetworking.registerGlobalReceiver(ImageOpenPayload.TYPE, (payload, context) -> pendingOpenUploadScreen = true);
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			String json = ClientInfoCollector.collectAsJson();
