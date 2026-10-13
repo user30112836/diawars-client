@@ -24,12 +24,14 @@ public class DiawarsClient implements ClientModInitializer {
 	 * handling, which closes the current screen right after), so the tick
 	 * handler opens it on the next tick instead.
 	 */
-	private static boolean pendingOpenUploadScreen;
+	private static volatile boolean pendingOpenUploadScreen;
 
 	@Override
 	public void onInitializeClient() {
 		PayloadTypeRegistry.serverboundPlay().register(ClientInfoPayload.TYPE, ClientInfoPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(ImagePayload.TYPE, ImagePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ImageOpenPayload.TYPE, ImageOpenPayload.CODEC);
+		ClientPlayNetworking.registerReceiver(ImageOpenPayload.TYPE, (payload, context) -> pendingOpenUploadScreen = true);
 
 		ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
 			String json = ClientInfoCollector.collectAsJson();
