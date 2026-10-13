@@ -18,6 +18,14 @@ public class DiawarsClient implements ClientModInitializer {
 
 	private static KeyMapping openUploadScreenKey;
 
+	/**
+	 * Set by the {@code /diawarsimage} command: the screen must NOT open
+	 * directly in the command callback (it runs inside ChatScreen input
+	 * handling, which closes the current screen right after), so the tick
+	 * handler opens it on the next tick instead.
+	 */
+	private static boolean pendingOpenUploadScreen;
+
 	@Override
 	public void onInitializeClient() {
 		PayloadTypeRegistry.serverboundPlay().register(ClientInfoPayload.TYPE, ClientInfoPayload.CODEC);
@@ -37,7 +45,9 @@ public class DiawarsClient implements ClientModInitializer {
 		));
 
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (openUploadScreenKey.consumeClick()) {
+			boolean open = openUploadScreenKey.consumeClick() || pendingOpenUploadScreen;
+			pendingOpenUploadScreen = false;
+			if (open) {
 				client.setScreenAndShow(new ImageUploadScreen());
 			}
 			drainUploadQueue(client);
@@ -45,7 +55,7 @@ public class DiawarsClient implements ClientModInitializer {
 
 		ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
 				dispatcher.register(ClientCommands.literal("diawarsimage").executes(context -> {
-					Minecraft.getInstance().setScreenAndShow(new ImageUploadScreen());
+					pendingOpenUploadScreen = true;
 					return 1;
 				}))
 		);
